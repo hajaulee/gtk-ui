@@ -10,10 +10,49 @@ GtkWidget * chatWindow;
 GtkWidget * resultDialog;
 GtkWidget * inputUsername;
 GtkWidget * inputChannel;
+GtkWidget * chatArea;
+GtkWidget * messageInput;
+GtkWidget *  chatOutputScroller;
+GtkWidget *frame;
+
+char name[100]; // store user name
+char channel [100]; // store channel name
+char message[200]; // store user input
+char channelMessage[4096]; // store all message for display
 void    initSelectFunctionDialog();
 void    showSelectFuntionDialog();
-
-
+void set_pos(GtkWidget *gw, int x, int y)
+{
+	gtk_fixed_put(GTK_FIXED(frame), gw, x, y);
+}
+void textViewSetText(GtkWidget *textView, char *text)// thay doi text trong o hien thi tin nhan
+{
+	char *x, *q;
+	GtkTextBuffer *t_buffer;
+	GtkTextIter start;
+	GtkTextIter end;
+	t_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textView));
+	if (t_buffer == NULL)
+	{
+		printf("Get buffer fail!");
+		t_buffer = gtk_text_buffer_new(NULL);
+	}
+	gtk_text_buffer_set_text(t_buffer, text, -1);
+	GtkAdjustment *adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(chatOutputScroller));
+	gtk_adjustment_set_value(adj, gtk_adjustment_get_upper(adj));
+	gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(chatOutputScroller), adj);
+}
+void onSendButtonClicked(){ // Su kien nhap tin nhan
+	strcpy(message, gtk_entry_get_text(GTK_ENTRY(messageInput)));
+	if(strcmp(message, "out") == 0){
+		showInputNameAndChannelDialog();
+		return;
+	}
+	gtk_entry_set_text(GTK_ENTRY(messageInput), "");
+	strcat(channelMessage, message);
+	textViewSetText(GTK_TEXT_VIEW(chatArea), channelMessage);
+	puts(message);
+}
 int main(int argc, char *argv[])
 {
 
@@ -32,7 +71,7 @@ int main(int argc, char *argv[])
 	
     initAll();
 	showSelectFuntionDialog();
-
+	// showMainWindow();
 
 	gtk_main();
 
@@ -57,11 +96,19 @@ void showMessage(GtkWidget *parent, GtkMessageType type, char *mms, char *conten
 	gtk_dialog_run(GTK_DIALOG(mdialog));
 	gtk_widget_destroy(mdialog);
 }
+/**********************************************
 
+
+Khong quan tam phia duoi nay
+
+
+
+************************************************/
 void initAll(){
     initSelectFunctionDialog();
     initSelectInfoDialog();
     initInputNameAndChannelDialog();
+	initMainWindow();
 }
 void showSelectInfoDialog(){
     gtk_widget_hide(sfDialog);
@@ -132,8 +179,96 @@ void showSelectFuntionDialog(){
 }
 void showInputNameAndChannelDialog(){
     gtk_widget_hide(sfDialog);
+	gtk_widget_hide(chatWindow);
     showDialog(inputNameChannelDialog);
 }
+
+GtkWidget *initChatArea(int x, int y)
+{
+	GtkWidget *outputBox;
+
+	//khoi tao hop chua chatArea hien thi khung chat
+	outputBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_widget_set_size_request(outputBox, 450, 280);
+	set_pos(outputBox, x, y);
+
+	//Khung chat
+	chatArea = gtk_text_view_new();
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(chatArea), GTK_WRAP_WORD_CHAR); //Chong tran be ngang
+
+	//Khoi tao thanh keo truot cho chatArea
+	chatOutputScroller = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(chatOutputScroller), chatArea);
+
+	gtk_box_pack_start(GTK_BOX(outputBox), chatOutputScroller, TRUE, TRUE, 2);
+	return chatArea;
+}
+
+GtkWidget *initMessageInput(int x, int y)
+{
+	GtkWidget *inputGroupBox;
+	GtkWidget *inputBox;
+	GtkWidget *sendButton;
+
+	//Khoi tao inputGroupBox
+	inputGroupBox = gtk_frame_new(TEXT_INPUT_LABEL);
+	gtk_widget_set_size_request(inputGroupBox, 450, 60);
+	set_pos(inputGroupBox, x, y);
+
+	//Khoi tao inputBox chua o text va nut send
+	inputBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_container_add(GTK_CONTAINER(inputGroupBox), inputBox);
+
+	//Khoi tao o nhap va chatArea hien thi nghia
+	messageInput = gtk_entry_new();
+	gtk_widget_set_size_request(messageInput, 388, 20);
+
+	//send button
+	sendButton = gtk_button_new_with_label(SEND_LABEL);
+	gtk_widget_set_margin_bottom(sendButton, 5);
+	gtk_widget_set_margin_top(sendButton, 0);
+
+	gtk_box_pack_start(GTK_BOX(inputBox), messageInput, TRUE, TRUE, 5);
+	gtk_box_pack_start(GTK_BOX(inputBox), sendButton, TRUE, TRUE, 5);
+
+	g_signal_connect(sendButton, "clicked", G_CALLBACK(onSendButtonClicked), NULL);
+	g_signal_connect(messageInput, "activate", G_CALLBACK(onSendButtonClicked), NULL);
+	return messageInput;
+}
+void initMainWindow()
+{
+	// Khoi tao cua so
+	// chatWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	// gtk_window_set_position(GTK_WINDOW(chatWindow), GTK_WIN_POS_CENTER);
+	// //gtk_window_set_default_size(GTK_WINDOW(window), -1, -1);
+	// gtk_window_set_title(GTK_WINDOW(chatWindow), APP_TITLE);
+	// gtk_window_set_resizable(GTK_WINDOW(chatWindow), FALSE);
+	chatWindow = gtk_dialog_new_with_buttons(CHAT_BUTTON, NULL,
+											  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
+	//Khoi tao nen
+	frame = gtk_fixed_new();
+
+	// gtk_container_add(GTK_CONTAINER(chatWindow), frame);
+	gtk_widget_set_margin_bottom(frame, 5);
+	gtk_widget_set_margin_end(frame, 5);
+
+	initChatArea(5, 10);
+	initMessageInput(5, 280);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(chatWindow))), frame, TRUE, TRUE, 0);
+	g_signal_connect(chatWindow, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
+}
+
+void showMainWindow()
+{
+	gtk_widget_hide(inputNameChannelDialog);
+	strcpy(name, gtk_entry_get_text(GTK_ENTRY(inputUsername)));
+	strcpy(channel, gtk_entry_get_text(GTK_ENTRY(inputChannel)));
+	// gtk_widget_show_all(chatWindow);
+	showDialog(chatWindow);
+	gtk_entry_grab_focus_without_selecting(GTK_ENTRY(messageInput));
+	printf("hello\n");
+}
+
 void initInputNameAndChannelDialog()
 {
 	inputNameChannelDialog = gtk_dialog_new_with_buttons(NAME_CHANNEL, NULL,
@@ -174,7 +309,7 @@ void initInputNameAndChannelDialog()
 
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(inputNameChannelDialog))), dialog_ground, TRUE, TRUE, 0);
     g_signal_connect(backButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
-	// g_signal_connect(loginButton, "clicked", G_CALLBACK(onLoginButtonClicked), data_array);
+	g_signal_connect(loginButton, "clicked", G_CALLBACK(showMainWindow), NULL);
 	g_signal_connect(cancelButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
 	// g_signal_connect(inputUsername, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
 	// g_signal_connect(inputChannel, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
@@ -217,4 +352,5 @@ void initSelectFunctionDialog()
     g_signal_connect(chatButton, "clicked", G_CALLBACK(showInputNameAndChannelDialog), NULL);
 	g_signal_connect(sfDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
 }
+
 
