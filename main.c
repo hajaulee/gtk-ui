@@ -222,7 +222,7 @@ GtkWidget *initMessageInput(int x, int y)
 	//Khoi tao o nhap va chatArea hien thi nghia
 	messageInput = gtk_entry_new();
 	gtk_widget_set_size_request(messageInput, 388, 20);
-
+	gtk_entry_set_placeholder_text(GTK_ENTRY(messageInput), "Enter \"out\" to back");
 	//send button
 	sendButton = gtk_button_new_with_label(SEND_LABEL);
 	gtk_widget_set_margin_bottom(sendButton, 5);
