@@ -5,11 +5,15 @@
 
 GtkWidget * sfDialog;
 GtkWidget * siDialog;
+GtkWidget * sisLoginDialog;
 GtkWidget * inputNameChannelDialog;
 GtkWidget * chatWindow;
 GtkWidget * resultDialog;
 GtkWidget * inputUsername;
 GtkWidget * inputChannel;
+GtkWidget * inputHocKy;
+GtkWidget * inputPassword;
+GtkWidget * inputMssv;
 GtkWidget * chatArea;
 GtkWidget * messageInput;
 GtkWidget *  chatOutputScroller;
@@ -24,6 +28,10 @@ void    showSelectFuntionDialog();
 void set_pos(GtkWidget *gw, int x, int y)
 {
 	gtk_fixed_put(GTK_FIXED(frame), gw, x, y);
+}
+void set_size(GtkWidget *gw, int width, int height)
+{
+	gtk_widget_set_size_request(gw, width, height);
 }
 void textViewSetText(GtkWidget *textView, char *text)// thay doi text trong o hien thi tin nhan
 {
@@ -96,6 +104,40 @@ void showMessage(GtkWidget *parent, GtkMessageType type, char *mms, char *conten
 	gtk_dialog_run(GTK_DIALOG(mdialog));
 	gtk_widget_destroy(mdialog);
 }
+
+void handleXSMB(){
+    // code here
+    char * result = "Ngày: 16/01/2019\nMã trúng giải: 4GU-12GU-7GU\nĐB: 22086\nG1: 79312\nG2: 90049 - 54062\nG3: 72537 - 10294 - 62485\n"
+	"\t99403 - 26631 - 73265\nG4: 3694 - 2907 - 6472 - 2670\nG5: 1937 - 7578 - 4575\n\t5576 - 4557 - 3331\nG6: 257 - 886 - 750\nG7: 28 - 97 - 31 - 95\n";
+    showMessage(siDialog, GTK_MESSAGE_INFO, "Thong tin xsmb", result);
+}
+void handleWeather(){
+    showMessage(siDialog, GTK_MESSAGE_INFO, "Weather", "Thong tin thoi tiet");
+}
+void handleSis(){
+	char mssv[20], password[100], hocky[10];
+	strcpy(mssv, gtk_entry_get_text(GTK_ENTRY(inputMssv)));
+	strcpy(password, gtk_entry_get_text(GTK_ENTRY(inputPassword)));
+	strcpy(hocky, gtk_entry_get_text(GTK_ENTRY(inputHocKy)));
+
+	printf("%s/%s/%s\n",mssv, password, hocky);
+	// code here
+
+
+	char * result = 
+	"Tiếng Anh VN VI   [7.5 6 C+]\n"
+	"Lý thuyết mạch logic   [4 6 D+]\n"
+	"Thực hành mạch logic   [9 7 B]\n"
+	"Thực hành cơ sở dữ liệu   [8.5 9.5 A]\n"
+	"Cơ sở dữ liệu   [9.5 10 A+]\n"
+	"Tiếng Nhật 5   [9 8.5 A]\n"
+	"Tiếng Nhật chuyên ngành 1   [8.5 8.5 A]\n"
+	"Bóng chuyền II   [5 6 C]\n"
+	"GPA: 3.38\t\tCPA: 3.64\n";
+
+    showMessage(siDialog, GTK_MESSAGE_INFO, "Sis", result);
+}
+
 /**********************************************
 
 
@@ -109,22 +151,77 @@ void initAll(){
     initSelectInfoDialog();
     initInputNameAndChannelDialog();
 	initMainWindow();
+	initSisLoginDialog();
 }
 void showSelectInfoDialog(){
     gtk_widget_hide(sfDialog);
+	gtk_widget_hide(sisLoginDialog);
     showDialog(siDialog);
 }
-void handleXSMB(){
-    // code here
-    char * result = "Kqsk......";
-    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", result);
+void initSisLoginDialog()
+{
+	sisLoginDialog = gtk_dialog_new_with_buttons(LOGIN, NULL,
+											  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
+
+	GtkWidget *dialog_ground = gtk_fixed_new();
+	GtkWidget *tframe = gtk_frame_new(MSSV);
+	GtkWidget *bframe = gtk_frame_new(PASSWORD);
+	GtkWidget *cframe = gtk_frame_new(HOC_KY);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *loginButton = gtk_button_new_with_label(TRA_CUU);
+	GtkWidget *cancelButton = gtk_button_new_with_label(CANCEL);
+	inputMssv = gtk_entry_new();
+	inputPassword = gtk_entry_new();
+	inputHocKy = gtk_entry_new();
+
+	gtk_entry_set_visibility(GTK_ENTRY(inputPassword), FALSE);
+
+	gtk_box_pack_start(GTK_BOX(box), loginButton, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), cancelButton, TRUE, TRUE, 2);
+
+	set_size(tframe, 300, 50);
+	set_size(bframe, 300, 50);
+	set_size(cframe, 300, 50);
+	set_size(box, 300, 50);
+	set_size(loginButton, 100, 30);
+	set_size(cancelButton, 100, 30);
+
+	gtk_widget_set_margin_start(inputMssv, 2);
+	gtk_widget_set_margin_end(inputMssv, 2);
+	gtk_widget_set_margin_start(inputPassword, 2);
+	gtk_widget_set_margin_end(inputPassword, 2);
+	gtk_widget_set_margin_start(inputHocKy, 2);
+	gtk_widget_set_margin_end(inputHocKy, 2);
+
+	gtk_fixed_put(GTK_FIXED(dialog_ground), tframe, 0, 20);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), bframe, 0, 80);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), cframe, 0, 140);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), box, 0, 280);
+
+	gtk_container_add(GTK_CONTAINER(tframe), inputMssv);
+	gtk_container_add(GTK_CONTAINER(bframe), inputPassword);
+	gtk_container_add(GTK_CONTAINER(cframe), inputHocKy);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(sisLoginDialog))), dialog_ground, TRUE, TRUE, 0);
+
+
+	g_signal_connect(loginButton, "clicked", G_CALLBACK(handleSis), NULL);
+	g_signal_connect(cancelButton, "clicked", G_CALLBACK(showSelectInfoDialog), NULL);
+	g_signal_connect(inputMssv, "activate", G_CALLBACK(handleSis), NULL);
+	g_signal_connect(inputPassword, "activate", G_CALLBACK(handleSis), NULL);
+	g_signal_connect(sisLoginDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
+
 }
-void handleWeather(){
-    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", "Thong tin thoi tiet");
+
+void showSisLoginDialog()
+{
+	gtk_widget_hide(siDialog);
+	gtk_widget_show_all(sisLoginDialog);
+	gtk_dialog_run(GTK_DIALOG(sisLoginDialog));
+	return;
 }
-void handleSis(){
-    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", "comming soon");
-}
+
+
 void initSelectInfoDialog(){
     siDialog = gtk_dialog_new_with_buttons(INFO_BUTTON, NULL,
 											  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
@@ -164,7 +261,7 @@ void initSelectInfoDialog(){
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(siDialog))), dialog_ground, TRUE, TRUE, 0);
     g_signal_connect(backButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
     g_signal_connect(xsmbButton, "clicked", G_CALLBACK(handleXSMB), NULL);
-    g_signal_connect(sisButton, "clicked", G_CALLBACK(handleSis), NULL);
+    g_signal_connect(sisButton, "clicked", G_CALLBACK(showSisLoginDialog), NULL);
     g_signal_connect(weatherButton, "clicked", G_CALLBACK(handleWeather), NULL);
 }
 void showDialog(GtkWidget * dialog){
