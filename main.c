@@ -6,7 +6,8 @@
 GtkWidget * sfDialog;
 GtkWidget * siDialog;
 GtkWidget * sisLoginDialog;
-GtkWidget * inputNameChannelDialog;
+GtkWidget * inputNameDialog;
+GtkWidget * inputChannelDialog;
 GtkWidget * chatWindow;
 GtkWidget * resultDialog;
 GtkWidget * inputUsername;
@@ -53,7 +54,7 @@ void textViewSetText(GtkWidget *textView, char *text)// thay doi text trong o hi
 void onSendButtonClicked(){ // Su kien nhap tin nhan
 	strcpy(message, gtk_entry_get_text(GTK_ENTRY(messageInput)));
 	if(strcmp(message, "out") == 0){
-		showInputNameAndChannelDialog();
+		showInputNameDialog();
 		return;
 	}
 	gtk_entry_set_text(GTK_ENTRY(messageInput), "");
@@ -149,7 +150,8 @@ Khong quan tam phia duoi nay
 void initAll(){
     initSelectFunctionDialog();
     initSelectInfoDialog();
-    initInputNameAndChannelDialog();
+    initInputNameDialog();
+	initInputChannelDialog();
 	initMainWindow();
 	initSisLoginDialog();
 }
@@ -271,15 +273,20 @@ void showDialog(GtkWidget * dialog){
 }
 void showSelectFuntionDialog(){
     gtk_widget_hide(siDialog);
-    gtk_widget_hide(inputNameChannelDialog);
+    gtk_widget_hide(inputNameDialog);
     showDialog(sfDialog);
 }
-void showInputNameAndChannelDialog(){
+void showInputNameDialog(){
     gtk_widget_hide(sfDialog);
-	gtk_widget_hide(chatWindow);
-    showDialog(inputNameChannelDialog);
+	gtk_widget_hide(inputChannelDialog);
+    showDialog(inputNameDialog);
 }
 
+void showInputChannelDialog(){
+    gtk_widget_hide(inputNameDialog);
+	gtk_widget_hide(chatWindow);
+    showDialog(inputChannelDialog);
+}
 GtkWidget *initChatArea(int x, int y)
 {
 	GtkWidget *outputBox;
@@ -357,7 +364,7 @@ void initMainWindow()
 
 void showMainWindow()
 {
-	gtk_widget_hide(inputNameChannelDialog);
+	gtk_widget_hide(inputChannelDialog);
 	strcpy(name, gtk_entry_get_text(GTK_ENTRY(inputUsername)));
 	strcpy(channel, gtk_entry_get_text(GTK_ENTRY(inputChannel)));
 	// gtk_widget_show_all(chatWindow);
@@ -365,52 +372,95 @@ void showMainWindow()
 	gtk_entry_grab_focus_without_selecting(GTK_ENTRY(messageInput));
 	printf("hello\n");
 }
+void initInputChannelDialog(){
+	inputChannelDialog = gtk_dialog_new_with_buttons(CHANNELNAME, NULL,
+											  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
 
-void initInputNameAndChannelDialog()
+	GtkWidget *dialog_ground = gtk_fixed_new();
+	// GtkWidget *tframe = gtk_frame_new(USERNAME);
+	GtkWidget *bframe = gtk_frame_new(CHANNELNAME);
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	GtkWidget *loginButton = gtk_button_new_with_label(JOIN_CHANNEL);
+	GtkWidget *cancelButton = gtk_button_new_with_label(CANCEL);
+
+    GtkWidget *backButton = gtk_button_new_with_label(BACK_BUTTON);
+	// inputUsername = gtk_entry_new();
+	inputChannel = gtk_entry_new();
+
+	gtk_box_pack_start(GTK_BOX(box), loginButton, TRUE, TRUE, 2);
+	gtk_box_pack_start(GTK_BOX(box), cancelButton, TRUE, TRUE, 2);
+
+	// gtk_widget_set_size_request(tframe, 300, 50);
+	gtk_widget_set_size_request(bframe, 300, 50);
+	gtk_widget_set_size_request(box, 300, 50);
+	gtk_widget_set_size_request(loginButton, 100, 30);
+	gtk_widget_set_size_request(cancelButton, 100, 30);
+
+	// gtk_widget_set_margin_start(inputUsername, 2);
+	// gtk_widget_set_margin_end(inputUsername, 2);
+	gtk_widget_set_margin_start(inputChannel, 2);
+	gtk_widget_set_margin_end(inputChannel, 2);
+
+    gtk_fixed_put(GTK_FIXED(dialog_ground), backButton, 00, 0);
+	// gtk_fixed_put(GTK_FIXED(dialog_ground), tframe, 0, 50);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), bframe, 0, 50);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), box, 0, 110);
+	gtk_container_add(GTK_CONTAINER(bframe), inputChannel);
+
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(inputChannelDialog))), dialog_ground, TRUE, TRUE, 0);
+    g_signal_connect(backButton, "clicked", G_CALLBACK(showInputNameDialog), NULL);
+	g_signal_connect(loginButton, "clicked", G_CALLBACK(showMainWindow), NULL);
+	g_signal_connect(cancelButton, "clicked", G_CALLBACK(showInputNameDialog), NULL);
+	// g_signal_connect(inputUsername, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
+	// g_signal_connect(inputChannel, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
+	g_signal_connect(inputChannelDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
+	
+}
+void initInputNameDialog()
 {
-	inputNameChannelDialog = gtk_dialog_new_with_buttons(NAME_CHANNEL, NULL,
+	inputNameDialog = gtk_dialog_new_with_buttons(NAME_CHANNEL, NULL,
 											  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL, NULL);
 
 	GtkWidget *dialog_ground = gtk_fixed_new();
 	GtkWidget *tframe = gtk_frame_new(USERNAME);
-	GtkWidget *bframe = gtk_frame_new(CHANNELNAME);
+	// GtkWidget *bframe = gtk_frame_new(CHANNELNAME);
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	GtkWidget *loginButton = gtk_button_new_with_label(LOGIN);
 	GtkWidget *cancelButton = gtk_button_new_with_label(CANCEL);
 
     GtkWidget *backButton = gtk_button_new_with_label(BACK_BUTTON);
 	inputUsername = gtk_entry_new();
-	inputChannel = gtk_entry_new();
+	// inputChannel = gtk_entry_new();
 
 	gtk_box_pack_start(GTK_BOX(box), loginButton, TRUE, TRUE, 2);
 	gtk_box_pack_start(GTK_BOX(box), cancelButton, TRUE, TRUE, 2);
 
 	gtk_widget_set_size_request(tframe, 300, 50);
-	gtk_widget_set_size_request(bframe, 300, 50);
+	// gtk_widget_set_size_request(bframe, 300, 50);
 	gtk_widget_set_size_request(box, 300, 50);
 	gtk_widget_set_size_request(loginButton, 100, 30);
 	gtk_widget_set_size_request(cancelButton, 100, 30);
 
 	gtk_widget_set_margin_start(inputUsername, 2);
 	gtk_widget_set_margin_end(inputUsername, 2);
-	gtk_widget_set_margin_start(inputChannel, 2);
-	gtk_widget_set_margin_end(inputChannel, 2);
+	// gtk_widget_set_margin_start(inputChannel, 2);
+	// gtk_widget_set_margin_end(inputChannel, 2);
 
     gtk_fixed_put(GTK_FIXED(dialog_ground), backButton, 00, 0);
 	gtk_fixed_put(GTK_FIXED(dialog_ground), tframe, 0, 50);
-	gtk_fixed_put(GTK_FIXED(dialog_ground), bframe, 0, 110);
-	gtk_fixed_put(GTK_FIXED(dialog_ground), box, 0, 250);
+	// gtk_fixed_put(GTK_FIXED(dialog_ground), bframe, 0, 110);
+	gtk_fixed_put(GTK_FIXED(dialog_ground), box, 0, 110);
 
 	gtk_container_add(GTK_CONTAINER(tframe), inputUsername);
-	gtk_container_add(GTK_CONTAINER(bframe), inputChannel);
+	// gtk_container_add(GTK_CONTAINER(bframe), inputChannel);
 
-	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(inputNameChannelDialog))), dialog_ground, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(inputNameDialog))), dialog_ground, TRUE, TRUE, 0);
     g_signal_connect(backButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
-	g_signal_connect(loginButton, "clicked", G_CALLBACK(showMainWindow), NULL);
+	g_signal_connect(loginButton, "clicked", G_CALLBACK(showInputChannelDialog), NULL);
 	g_signal_connect(cancelButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
 	// g_signal_connect(inputUsername, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
 	// g_signal_connect(inputChannel, "activate", G_CALLBACK(onLoginButtonClicked), data_array);
-	g_signal_connect(inputNameChannelDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
+	g_signal_connect(inputNameDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
 	
 }
 void initSelectFunctionDialog()
@@ -446,7 +496,7 @@ void initSelectFunctionDialog()
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(sfDialog))), dialog_ground, TRUE, TRUE, 0);
 
 	g_signal_connect(infoButton, "clicked", G_CALLBACK(showSelectInfoDialog), NULL);
-    g_signal_connect(chatButton, "clicked", G_CALLBACK(showInputNameAndChannelDialog), NULL);
+    g_signal_connect(chatButton, "clicked", G_CALLBACK(showInputNameDialog), NULL);
 	g_signal_connect(sfDialog, "destroy", G_CALLBACK(onExit), NULL); //Ket thuc chuong trinh khi dong cua so chinh
 }
 
