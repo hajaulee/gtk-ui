@@ -54,7 +54,7 @@ void textViewSetText(GtkWidget *textView, char *text)// thay doi text trong o hi
 void onSendButtonClicked(){ // Su kien nhap tin nhan
 	strcpy(message, gtk_entry_get_text(GTK_ENTRY(messageInput)));
 	if(strcmp(message, "/out") == 0){
-		showInputNameDialog();
+		showInputChannelDialog();
 		return;
 	}
 	gtk_entry_set_text(GTK_ENTRY(messageInput), "");
