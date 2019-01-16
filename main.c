@@ -44,6 +44,20 @@ int main(int argc, char *argv[])
 void onExit(){
     exit(0);
 }
+void showMessage(GtkWidget *parent, GtkMessageType type, char *mms, char *content)
+{
+	GtkWidget *mdialog;
+	mdialog = gtk_message_dialog_new(GTK_WINDOW(parent),
+									 GTK_DIALOG_DESTROY_WITH_PARENT,
+									 type,
+									 GTK_BUTTONS_OK,
+									 "%s", mms);
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(mdialog), "%s", content);
+	gtk_widget_show_all(mdialog);
+	gtk_dialog_run(GTK_DIALOG(mdialog));
+	gtk_widget_destroy(mdialog);
+}
+
 void initAll(){
     initSelectFunctionDialog();
     initSelectInfoDialog();
@@ -52,6 +66,17 @@ void initAll(){
 void showSelectInfoDialog(){
     gtk_widget_hide(sfDialog);
     showDialog(siDialog);
+}
+void handleXSMB(){
+    // code here
+    char * result = "Kqsk......";
+    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", result);
+}
+void handleWeather(){
+    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", "Thong tin thoi tiet");
+}
+void handleSis(){
+    showMessage(siDialog, GTK_MESSAGE_INFO, "XSMB", "comming soon");
 }
 void initSelectInfoDialog(){
     siDialog = gtk_dialog_new_with_buttons(INFO_BUTTON, NULL,
@@ -91,6 +116,9 @@ void initSelectInfoDialog(){
     gtk_box_pack_start(GTK_BOX(inputBox), sisButton, TRUE, TRUE, 20);
 	gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(siDialog))), dialog_ground, TRUE, TRUE, 0);
     g_signal_connect(backButton, "clicked", G_CALLBACK(showSelectFuntionDialog), NULL);
+    g_signal_connect(xsmbButton, "clicked", G_CALLBACK(handleXSMB), NULL);
+    g_signal_connect(sisButton, "clicked", G_CALLBACK(handleSis), NULL);
+    g_signal_connect(weatherButton, "clicked", G_CALLBACK(handleWeather), NULL);
 }
 void showDialog(GtkWidget * dialog){
     gtk_widget_show_all(dialog);
